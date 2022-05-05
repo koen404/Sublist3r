@@ -162,6 +162,10 @@ class enumratorBase(object):
             'Accept-Language': 'en-US,en;q=0.8',
             'Accept-Encoding': 'gzip',
         }
+        try:
+            self.vt_api = os.environ['VT_API']
+        except KeyError:
+            self.vt_api = None
         self.print_banner()
 
     def print_(self, text):
@@ -623,7 +627,7 @@ class DNSdumpster(enumratorBaseThreaded):
         Resolver.nameservers = ['8.8.8.8', '8.8.4.4']
         self.lock.acquire()
         try:
-            ip = Resolver.query(host, 'A')[0].to_text()
+            ip = Resolver.resolve(host, 'A')[0].to_text()
             if ip:
                 if self.verbose:
                     self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
@@ -690,7 +694,7 @@ class DNSdumpster(enumratorBaseThreaded):
 class Virustotal(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
+        base_url = 'https://www.virustotal.com/api/v3/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
         self.q = q
         super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
@@ -701,6 +705,9 @@ class Virustotal(enumratorBaseThreaded):
     # the main send_req need to be rewritten
     def send_req(self, url):
         try:
+            headers = self.headers
+            # add VT-api key here to prevent it from being send to every endpoint
+            headers['x-apikey'] = self.vt_api
             resp = self.session.get(url, headers=self.headers, timeout=self.timeout)
         except Exception as e:
             self.print_(e)
@@ -710,17 +717,22 @@ class Virustotal(enumratorBaseThreaded):
 
     # once the send_req is rewritten we don't need to call this function, the stock one should be ok
     def enumerate(self):
-        while self.url != '':
-            resp = self.send_req(self.url)
-            resp = json.loads(resp)
-            if 'error' in resp:
-                self.print_(R + "[!] Error: Virustotal probably now is blocking our requests" + W)
-                break
-            if 'links' in resp and 'next' in resp['links']:
-                self.url = resp['links']['next']
-            else:
-                self.url = ''
-            self.extract_domains(resp)
+        # check to see if vt_api env variable is set
+        if self.vt_api:
+            while self.url != '':
+                resp = self.send_req(self.url)
+                resp = json.loads(resp)
+
+                if 'error' in resp:
+                    self.print_(R + "[!] Virustotal Error: " +resp['error']['code'] + W)
+                    break
+                if 'links' in resp and 'next' in resp['links']:
+                    self.url = resp['links']['next']
+                else:
+                    self.url = ''
+                self.extract_domains(resp)
+        else:
+            print(Y + "Warning Virustotal API-key not set please set with env variable:'VT_API:<API-KEY>'")
         return self.subdomains
 
     def extract_domains(self, resp):
@@ -812,7 +824,6 @@ class CrtSearch(enumratorBaseThreaded):
                 subdomains = []
                 if '<BR>' in link:
                     subdomains = link.split('<BR>')
-                    print(subdomains)
                 else:
 
                     subdomains.append(link)
