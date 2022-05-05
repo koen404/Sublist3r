@@ -34,6 +34,7 @@ else:
 # there's also an option to disable the SSL warning:
 try:
     import requests.packages.urllib3
+
     requests.packages.urllib3.disable_warnings()
 except:
     pass
@@ -48,12 +49,13 @@ if is_windows:
     Y = '\033[93m'  # yellow
     B = '\033[94m'  # blue
     R = '\033[91m'  # red
-    W = '\033[0m'   # white
+    W = '\033[0m'  # white
     try:
-        import win_unicode_console , colorama
+        import win_unicode_console, colorama
+
         win_unicode_console.enable()
         colorama.init()
-        #Now the unicode will work ^_^
+        # Now the unicode will work ^_^
     except:
         print("[!] Error: Coloring libraries not installed, no coloring will be used [Check the readme]")
         G = Y = B = R = W = G = Y = B = R = W = ''
@@ -64,7 +66,8 @@ else:
     Y = '\033[93m'  # yellow
     B = '\033[94m'  # blue
     R = '\033[91m'  # red
-    W = '\033[0m'   # white
+    W = '\033[0m'  # white
+
 
 def no_color():
     global G, Y, B, R, W
@@ -98,8 +101,10 @@ def parse_args():
     parser.add_argument('-d', '--domain', help="Domain name to enumerate it's subdomains", required=True)
     parser.add_argument('-b', '--bruteforce', help='Enable the subbrute bruteforce module', nargs='?', default=False)
     parser.add_argument('-p', '--ports', help='Scan the found subdomains against specified tcp ports')
-    parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?', default=False)
-    parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int, default=30)
+    parser.add_argument('-v', '--verbose', help='Enable Verbosity and display results in realtime', nargs='?',
+                        default=False)
+    parser.add_argument('-t', '--threads', help='Number of threads to use for subbrute bruteforce', type=int,
+                        default=30)
     parser.add_argument('-e', '--engines', help='Specify a comma-separated list of search engines')
     parser.add_argument('-o', '--output', help='Save the results to text file')
     parser.add_argument('-n', '--no-color', help='Output without color', default=False, action='store_true')
@@ -152,7 +157,7 @@ class enumratorBase(object):
         self.silent = silent
         self.verbose = verbose
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.8',
             'Accept-Encoding': 'gzip',
@@ -246,7 +251,7 @@ class enumratorBase(object):
                 retries += 1
                 page_no = self.get_page(page_no)
 
-        # make another retry maybe it isn't the last page
+                # make another retry maybe it isn't the last page
                 if retries >= 3:
                     return self.subdomains
 
@@ -277,7 +282,8 @@ class GoogleEnum(enumratorBaseThreaded):
         self.engine_name = "Google"
         self.MAX_DOMAINS = 11
         self.MAX_PAGES = 200
-        super(GoogleEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(GoogleEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                         verbose=verbose)
         self.q = q
         return
 
@@ -327,7 +333,8 @@ class YahooEnum(enumratorBaseThreaded):
         self.engine_name = "Yahoo"
         self.MAX_DOMAINS = 10
         self.MAX_PAGES = 0
-        super(YahooEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(YahooEnum, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                        verbose=verbose)
         self.q = q
         return
 
@@ -378,7 +385,8 @@ class AskEnum(enumratorBaseThreaded):
         self.engine_name = "Ask"
         self.MAX_DOMAINS = 11
         self.MAX_PAGES = 0
-        enumratorBaseThreaded.__init__(self, base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        enumratorBaseThreaded.__init__(self, base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                       verbose=verbose)
         self.q = q
         return
 
@@ -466,7 +474,8 @@ class BaiduEnum(enumratorBaseThreaded):
         self.engine_name = "Baidu"
         self.MAX_DOMAINS = 2
         self.MAX_PAGES = 760
-        enumratorBaseThreaded.__init__(self, base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        enumratorBaseThreaded.__init__(self, base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                       verbose=verbose)
         self.querydomain = self.domain
         self.q = q
         return
@@ -524,7 +533,8 @@ class NetcraftEnum(enumratorBaseThreaded):
         subdomains = subdomains or []
         self.base_url = 'https://searchdns.netcraft.com/?restriction=site+ends+with&host={domain}'
         self.engine_name = "Netcraft"
-        super(NetcraftEnum, self).__init__(self.base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(NetcraftEnum, self).__init__(self.base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                           verbose=verbose)
         self.q = q
         return
 
@@ -552,7 +562,8 @@ class NetcraftEnum(enumratorBaseThreaded):
         cookies_list = cookie[0:cookie.find(';')].split("=")
         cookies[cookies_list[0]] = cookies_list[1]
         # hashlib.sha1 requires utf-8 encoded str
-        cookies['netcraft_js_verification_response'] = hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-8')).hexdigest()
+        cookies['netcraft_js_verification_response'] = hashlib.sha1(
+            urllib.unquote(cookies_list[1]).encode('utf-8')).hexdigest()
         return cookies
 
     def get_cookies(self, headers):
@@ -602,7 +613,8 @@ class DNSdumpster(enumratorBaseThreaded):
         self.engine_name = "DNSdumpster"
         self.q = q
         self.lock = None
-        super(DNSdumpster, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(DNSdumpster, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                          verbose=verbose)
         return
 
     def check_host(self, host):
@@ -645,7 +657,7 @@ class DNSdumpster(enumratorBaseThreaded):
         self.lock = threading.BoundedSemaphore(value=70)
         resp = self.req('GET', self.base_url)
         token = self.get_csrftoken(resp)
-        params = {'csrfmiddlewaretoken': token, 'targetip': self.domain}
+        params = {'csrfmiddlewaretoken': token, 'targetip': self.domain, 'user':'free'}
         post_resp = self.req('POST', self.base_url, params)
         self.extract_domains(post_resp)
         for subdomain in self.subdomains:
@@ -655,11 +667,13 @@ class DNSdumpster(enumratorBaseThreaded):
         return self.live_subdomains
 
     def extract_domains(self, resp):
-        tbl_regex = re.compile('<a name="hostanchor"><\/a>Host Records.*?<table.*?>(.*?)</table>', re.S)
+        tbl_regex = re.compile('<a name="hostanchor"></a>Host Records.*?<table.*?>(.*?)</table>', re.S)
         link_regex = re.compile('<td class="col-md-4">(.*?)<br>', re.S)
         links = []
         try:
+
             results_tbl = tbl_regex.findall(resp)[0]
+
         except IndexError:
             results_tbl = ''
         links_list = link_regex.findall(results_tbl)
@@ -679,7 +693,8 @@ class Virustotal(enumratorBaseThreaded):
         base_url = 'https://www.virustotal.com/ui/domains/{domain}/subdomains'
         self.engine_name = "Virustotal"
         self.q = q
-        super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(Virustotal, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                         verbose=verbose)
         self.url = self.base_url.format(domain=self.domain)
         return
 
@@ -709,7 +724,7 @@ class Virustotal(enumratorBaseThreaded):
         return self.subdomains
 
     def extract_domains(self, resp):
-        #resp is already parsed as json
+        # resp is already parsed as json
         try:
             for i in resp['data']:
                 if i['type'] == 'domain':
@@ -730,7 +745,8 @@ class ThreatCrowd(enumratorBaseThreaded):
         base_url = 'https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}'
         self.engine_name = "ThreatCrowd"
         self.q = q
-        super(ThreatCrowd, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(ThreatCrowd, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                          verbose=verbose)
         return
 
     def req(self, url):
@@ -768,7 +784,8 @@ class CrtSearch(enumratorBaseThreaded):
         base_url = 'https://crt.sh/?q=%25.{domain}'
         self.engine_name = "SSL Certificates"
         self.q = q
-        super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(CrtSearch, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                        verbose=verbose)
         return
 
     def req(self, url):
@@ -795,7 +812,9 @@ class CrtSearch(enumratorBaseThreaded):
                 subdomains = []
                 if '<BR>' in link:
                     subdomains = link.split('<BR>')
+                    print(subdomains)
                 else:
+
                     subdomains.append(link)
 
                 for subdomain in subdomains:
@@ -803,7 +822,7 @@ class CrtSearch(enumratorBaseThreaded):
                         continue
 
                     if '@' in subdomain:
-                        subdomain = subdomain[subdomain.find('@')+1:]
+                        subdomain = subdomain[subdomain.find('@') + 1:]
 
                     if subdomain not in self.subdomains and subdomain != self.domain:
                         if self.verbose:
@@ -813,13 +832,15 @@ class CrtSearch(enumratorBaseThreaded):
             print(e)
             pass
 
+
 class PassiveDNS(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
         base_url = 'https://api.sublist3r.com/search.php?domain={domain}'
         self.engine_name = "PassiveDNS"
         self.q = q
-        super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent, verbose=verbose)
+        super(PassiveDNS, self).__init__(base_url, self.engine_name, domain, subdomains, q=q, silent=silent,
+                                         verbose=verbose)
         return
 
     def req(self, url):
@@ -960,7 +981,8 @@ def main(domain, threads, savefile, ports, silent, verbose, enable_bruteforce, e
         process_count = threads
         output = False
         json_output = False
-        bruteforce_list = subbrute.print_target(parsed_domain.netloc, record_type, subs, resolvers, process_count, output, json_output, search_list, verbose)
+        bruteforce_list = subbrute.print_target(parsed_domain.netloc, record_type, subs, resolvers, process_count,
+                                                output, json_output, search_list, verbose)
 
     subdomains = search_list.union(bruteforce_list)
 
@@ -1000,7 +1022,9 @@ def interactive():
     if args.no_color:
         no_color()
     banner()
-    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce, engines=engines)
+    res = main(domain, threads, savefile, ports, silent=False, verbose=verbose, enable_bruteforce=enable_bruteforce,
+               engines=engines)
+
 
 if __name__ == "__main__":
     interactive()
