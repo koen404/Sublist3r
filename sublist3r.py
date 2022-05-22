@@ -22,7 +22,7 @@ from subbrute import subbrute
 import dns.resolver
 import requests
 
-# Python 2.x and 3.x compatiablity
+# Python 2.x and 3.x compatibility
 if sys.version > '3':
     import urllib.parse as urlparse
     import urllib.parse as urllib
@@ -282,7 +282,7 @@ class enumratorBaseThreaded(multiprocessing.Process, enumratorBase):
 class GoogleEnum(enumratorBaseThreaded):
     def __init__(self, domain, subdomains=None, q=None, silent=False, verbose=True):
         subdomains = subdomains or []
-        base_url = "https://google.com/search?q={query}&btnG=Search&hl=en-US&biw=&bih=&gbv=1&start={page_no}&filter=0"
+        base_url = "https://google.com/search?q={query}&start={page_no}&sa=G&hl=en-US&gbv=2&sei="
         self.engine_name = "Google"
         self.MAX_DOMAINS = 11
         self.MAX_PAGES = 200
@@ -291,11 +291,23 @@ class GoogleEnum(enumratorBaseThreaded):
         self.q = q
         return
 
+    # Added consent cookie to send request to get google search results.
+    # Maybe add a check to see if the consent cookie is still valid.
+    def send_req(self, query, page_no=1):
+        self.session.cookies.set("CONSENT", "YES+srp.gws-20220503-0-RC1.nl+FX+609")
+        url = self.base_url.format(query=query, page_no=page_no)
+        try:
+            resp = self.session.get(url,allow_redirects=True, headers=self.headers, timeout=self.timeout)
+        except Exception:
+            resp = None
+        return self.get_response(resp)
+
     def extract_domains(self, resp):
         links_list = list()
         link_regx = re.compile('<cite.*?>(.*?)<\/cite>')
         try:
             links_list = link_regx.findall(resp)
+
             for link in links_list:
                 link = re.sub('<span.*>', '', link)
                 if not link.startswith('http'):
